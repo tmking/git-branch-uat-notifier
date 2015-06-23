@@ -16,7 +16,7 @@ my_branch merged into uat on Fri Jun 19 (abcd123)
 my_branch merged into uat on Fri Jun 5 (efgh456)
 ```
 
-`git-branch-uat-notifier` outputs information using pretty color for your heightened aesthetic perception.
+`git-branch-uat-notifier` outputs information using pretty colors for your heightened aesthetic enjoyment.
 
 ## Requirements
 
