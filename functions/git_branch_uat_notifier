@@ -1,0 +1,34 @@
+
+list_uat_merges() {
+  local branch_name current_branch
+  current_branch=$(git rev-parse --abbrev-ref HEAD)
+  target_branch=${1:-$current_branch}
+
+  git log $uat_branch --merges --pretty=format:"%h%x09%an%x09%ad%x09%s" | head -n ${2:-10} | grep $target_branch | while read ref first_name last_name day month date time year other; do
+  truncated_branch_name=$(print -P "%18>>$target_branch")
+    echo "\033[0;32m$truncated_branch_name\033[0m merged into $uat_branch on \033[1;34m$day $month $date\033[0m by \033[0;32m$first_name\033[0m (\033[0;33m$ref\033[0m)"
+  done
+}
+
+check_for_uat_merge() {
+  local target_branch uat_merges truncated_branch_name
+
+  list_uat_merges $1
+}
+
+preexec() {
+  export uat_branch=${UAT_BRANCH_NAME:-uat}
+  git branch | grep -q $uat_branch || return
+
+  echo "${1}" | while read command first_argument branch other_arguments; do
+    case ${first_argument} in
+      *co*|*checkout*)
+        check_for_uat_merge $branch
+        ;;
+      *)
+        return
+    esac
+  done
+}
+
+eval "$(functions prexec)"
