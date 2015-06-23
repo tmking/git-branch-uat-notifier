@@ -31,7 +31,7 @@ process_other_branch() {
   branch=$2
 
   case $first_argument in
-    *co*|*checkout*)
+    co|checkout)
       git branch | grep -q $branch || return
       list_uat_merges $branch
       uat_contains_current_commit $branch
