@@ -1,4 +1,3 @@
-
 list_uat_merges() {
   local branch_name current_branch
   current_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -10,10 +9,39 @@ list_uat_merges() {
   done
 }
 
-check_for_uat_merge() {
-  local target_branch uat_merges truncated_branch_name
+uat_contains_current_commit() {
+  local current_commit
+  current_commit=$(git rev-parse $1)
+  if git branch --contains $current_commit | grep -q $uat_branch; then
+    echo "\033[0;32m$1 is up to date with $uat_branch!\033[0m"
+  else
+    echo "\033[1;31m$1 is out of sync with $uat_branch!\033[0m"
+  fi
+}
 
-  list_uat_merges $1
+process_uat_branch() {
+  git branch | grep feature | while read branch_name; do
+    uat_contains_current_commit $branch_name
+  done
+}
+
+process_other_branch() {
+  local first_argument branch
+  first_argument=$1
+  branch=$2
+
+  case $first_argument in
+    *co*|*checkout*)
+      git branch | grep -q $branch || return
+      list_uat_merges $branch
+      uat_contains_current_commit $branch
+      ;;
+    pull|push|fetch)
+      uat_contains_current_commit $branch
+      ;;
+    *)
+      return
+  esac
 }
 
 preexec() {
@@ -21,9 +49,15 @@ preexec() {
   git branch | grep -q $uat_branch || return
 
   echo "${1}" | while read command first_argument branch other_arguments; do
-    case ${first_argument} in
-      *co*|*checkout*)
-        check_for_uat_merge $branch
+    case $first_argument in
+      *co*|checkout|pull|fetch|push)
+        case $branch in
+          $uat_branch)
+            process_uat_branch
+            ;;
+          *)
+            process_other_branch $first_argument $branch
+        esac
         ;;
       *)
         return
