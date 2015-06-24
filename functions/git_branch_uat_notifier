@@ -20,7 +20,7 @@ uat_contains_current_commit() {
 }
 
 process_uat_branch() {
-  git branch | grep feature | while read branch_name; do
+  git branch | grep feature | grep -v '*' | while read branch_name; do
     uat_contains_current_commit $branch_name
   done
 }
@@ -36,8 +36,8 @@ process_other_branch() {
       list_uat_merges $branch
       uat_contains_current_commit $branch
       ;;
-    pull|push|fetch)
-      uat_contains_current_commit $branch
+    pull|fetch)
+      [[ -n "$branch" ]] && uat_contains_current_commit $branch
       ;;
     *)
       return
