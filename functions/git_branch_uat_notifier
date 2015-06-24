@@ -45,8 +45,10 @@ process_other_branch() {
 }
 
 preexec() {
-  export uat_branch=${UAT_BRANCH_NAME:-uat}
+  [[ -d "$PWD/.git" ]] || return
   git branch | grep -q $uat_branch || return
+
+  export uat_branch=${UAT_BRANCH_NAME:-uat}
 
   echo "${1}" | while read command first_argument branch other_arguments; do
     case $first_argument in
