@@ -44,7 +44,7 @@ process_other_branch() {
   esac
 }
 
-preexec() {
+git_branch_uat_notifier_preexec() {
   [[ -d "$PWD/.git" ]] || return
   export uat_branch=${UAT_BRANCH_NAME:-uat}
   git branch | grep -q $uat_branch || return
@@ -57,7 +57,7 @@ preexec() {
           $uat_branch)
             process_uat_branch
             ;;
-          *)
+          feature*)
             process_other_branch $first_argument $branch
         esac
         ;;
@@ -67,4 +67,4 @@ preexec() {
   done
 }
 
-eval "$(functions prexec)"
+add-zsh-hook preexec git_branch_uat_notifier_preexec
